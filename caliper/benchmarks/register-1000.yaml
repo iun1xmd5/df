@@ -1,0 +1,17 @@
+test:
+  name: register-1000
+  description: 1000 RegisterEvidence transactions at 100 TPS
+  workers:
+    number: 5
+  rounds:
+    - label: reg-1000
+      txNumber: 1000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 100
+      workload:
+        module: workload/registerEvidence.js
+        arguments:
+          operation: RegisterEvidence
+          perRunPrefix: "run-${CALIPER_RUN_ID:-default}"
