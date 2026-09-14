@@ -8,13 +8,13 @@ Reproducibility artifacts for the paper:
 
 > **Scaling Hyperledger Fabric for Forensic Evidence Registration: A Replicated Study of Latency--Throughput Trade-offs**  
 > Stephen Wambura and Juma Ismail  
-> *Forensic Science International: Digital Investigation* (under review)
+> *Forensic Science International: Digital Investigation* (submitted)
 
 ## Overview
 
 This repository contains the chaincode, network configuration, benchmarking workloads, and Python analysis pipeline used to produce the empirical results reported in the paper. The study examines how peer count (5, 10, 15) affects write latency and sustained throughput in a permissioned Hyperledger Fabric network running a forensic evidence-registration workload.
 
-### Key results
+### Key resu
 
 | Metric | 5 peers | 10 peers | 15 peers |
 |---|---|---|---|
