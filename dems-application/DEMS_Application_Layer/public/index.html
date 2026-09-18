@@ -1,0 +1,2325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEMS — Digital Evidence Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DEMS — Digital Evidence Management System
+   Application layer for the performance-optimised blockchain
+   network. Implements the six EvidenceContract operations.
+   Palette: Ocean Gradient (consistent with the dissertation).
+   ============================================================ */
+:root {
+  --navy:   #21295C;
+  --deep:   #065A82;
+  --teal:   #1C7293;
+  --mint:   #9EB3C2;
+  --cream:  #F8FAFC;
+  --ink:    #1E293B;
+  --muted:  #64748B;
+  --line:   #E2E8F0;
+  --white:  #FFFFFF;
+  --ok:     #15803D;
+  --ok-bg:  #DCFCE7;
+  --warn:   #B45309;
+  --warn-bg:#FEF3C7;
+  --bad:    #B91C1C;
+  --bad-bg: #FEE2E2;
+  --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', 'Courier New', monospace;
+  --serif: 'Newsreader', Georgia, serif;
+  --shadow: 0 1px 3px rgba(15,23,42,.08), 0 4px 16px rgba(15,23,42,.06);
+  --shadow-lg: 0 8px 32px rgba(15,23,42,.14);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: var(--sans);
+  background: var(--cream);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- App shell ---------- */
+.app { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  background: var(--navy);
+  color: var(--mint);
+  display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh;
+}
+.brand {
+  padding: 22px 22px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.brand-mark {
+  display: flex; align-items: center; gap: 10px;
+}
+.brand-glyph {
+  width: 34px; height: 34px; flex-shrink: 0;
+  border: 2px solid var(--teal);
+  border-radius: 7px;
+  display: grid; place-items: center;
+  position: relative;
+}
+.brand-glyph::before {
+  content: ''; width: 12px; height: 12px;
+  background: var(--teal); border-radius: 2px;
+}
+.brand-glyph::after {
+  content: ''; position: absolute;
+  width: 34px; height: 2px; background: var(--teal);
+  opacity: .35;
+}
+.brand-name {
+  font-family: var(--serif);
+  font-size: 21px; font-weight: 600; color: var(--white);
+  letter-spacing: .3px;
+}
+.brand-sub {
+  font-size: 10.5px; color: var(--mint);
+  letter-spacing: 1.4px; text-transform: uppercase;
+  margin-top: 3px;
+}
+.nav { padding: 14px 12px; flex: 1; }
+.nav-label {
+  font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: #5B6BA8; padding: 12px 12px 6px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 12px; border-radius: 8px;
+  color: var(--mint); cursor: pointer;
+  font-size: 13.5px; font-weight: 500;
+  transition: background .15s, color .15s;
+  border: none; background: none; width: 100%; text-align: left;
+  font-family: var(--sans);
+}
+.nav-item:hover { background: rgba(255,255,255,.06); color: var(--white); }
+.nav-item.active { background: var(--deep); color: var(--white); }
+.nav-item .ic { width: 17px; height: 17px; flex-shrink: 0; opacity: .9; }
+.nav-item.active .ic { opacity: 1; }
+
+.net-card {
+  margin: 12px; padding: 13px 14px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 9px;
+}
+.net-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.net-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #34D399; box-shadow: 0 0 0 3px rgba(52,211,153,.2);
+  flex-shrink: 0;
+}
+.net-title { font-size: 11.5px; font-weight: 600; color: var(--white); }
+.net-meta { font-size: 10.5px; color: var(--mint); line-height: 1.7; }
+.net-meta b { color: #C7D4DF; font-weight: 600; }
+
+/* ---------- Main area ---------- */
+.main { display: flex; flex-direction: column; min-width: 0; }
+.topbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  padding: 16px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 20;
+}
+.topbar-title h1 {
+  font-family: var(--serif);
+  font-size: 22px; font-weight: 600; color: var(--ink);
+}
+.topbar-title p { font-size: 12.5px; color: var(--muted); margin-top: 1px; }
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+.user-chip {
+  display: flex; align-items: center; gap: 9px;
+  padding: 5px 12px 5px 5px; border-radius: 999px;
+  background: var(--cream); border: 1px solid var(--line);
+}
+.user-av {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--deep); color: var(--white);
+  display: grid; place-items: center;
+  font-size: 11px; font-weight: 700;
+}
+.user-meta { font-size: 11.5px; line-height: 1.3; }
+.user-meta b { display: block; color: var(--ink); font-weight: 600; }
+.user-meta span { color: var(--muted); font-size: 10.5px; }
+
+.content { padding: 28px 32px 56px; max-width: 1180px; width: 100%; }
+
+/* ---------- View transitions ---------- */
+.view { display: none; animation: fade .25s ease; }
+.view.active { display: block; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ---------- Section headers ---------- */
+.section-head { margin-bottom: 20px; }
+.section-head h2 {
+  font-family: var(--serif); font-size: 19px; font-weight: 600;
+  color: var(--ink); margin-bottom: 2px;
+}
+.section-head p { font-size: 13px; color: var(--muted); }
+
+/* ---------- Stat cards ---------- */
+.stat-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 16px; margin-bottom: 26px;
+}
+.stat {
+  background: var(--white); border: 1px solid var(--line);
+  border-radius: 12px; padding: 18px 18px 16px;
+  box-shadow: var(--shadow); position: relative; overflow: hidden;
+}
+.stat::after {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 3px; height: 100%; background: var(--teal);
+}
+.stat.s-deep::after { background: var(--deep); }
+.stat.s-navy::after { background: var(--navy); }
+.stat.s-ok::after   { background: var(--ok); }
+.stat-label {
+  font-size: 11px; letter-spacing: .6px; text-transform: uppercase;
+  color: var(--muted); font-weight: 600;
+}
+.stat-value {
+  font-family: var(--serif); font-size: 32px; font-weight: 600;
+  color: var(--ink); margin: 6px 0 2px; line-height: 1;
+}
+.stat-foot { font-size: 11.5px; color: var(--muted); }
+.stat-foot b { color: var(--teal); font-weight: 600; }
+.stat.clickable { cursor: pointer; transition: box-shadow .15s, transform .15s; }
+.stat.clickable:hover { box-shadow: var(--shadow-lg); transform: translateY(-1px); }
+
+/* ---------- Panels ---------- */
+.panel {
+  background: var(--white); border: 1px solid var(--line);
+  border-radius: 12px; box-shadow: var(--shadow);
+  margin-bottom: 22px;
+}
+.panel-head {
+  padding: 15px 20px; border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.panel-head h3 {
+  font-size: 14px; font-weight: 600; color: var(--ink);
+  display: flex; align-items: center; gap: 8px;
+}
+.panel-head .hint { font-size: 11.5px; color: var(--muted); font-weight: 400; }
+.panel-body { padding: 20px; }
+.panel-body.flush { padding: 0; }
+
+/* ---------- Pagination ---------- */
+.pager {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px; border-top: 1px solid var(--line);
+  font-size: 12px; color: var(--muted);
+}
+.pager .btn-row { margin-top: 0; }
+
+/* ---------- Loading / error states ---------- */
+.state-msg {
+  text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px;
+}
+.state-msg.err { color: var(--bad); }
+.state-msg .btn { margin-top: 12px; }
+.spin-lg {
+  width: 22px; height: 22px; border: 3px solid var(--line);
+  border-top-color: var(--deep); border-radius: 50%;
+  animation: rot .7s linear infinite; display: inline-block; margin-bottom: 10px;
+}
+
+/* ---------- Two-column ---------- */
+.cols { display: grid; grid-template-columns: 1.55fr 1fr; gap: 22px; align-items: start; }
+
+/* ---------- Tables ---------- */
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  text-align: left; font-size: 10.5px; letter-spacing: .7px;
+  text-transform: uppercase; color: var(--muted); font-weight: 600;
+  padding: 11px 20px; border-bottom: 1px solid var(--line);
+  background: #FBFCFD;
+}
+tbody td {
+  padding: 13px 20px; border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr.clickable { cursor: pointer; transition: background .12s; }
+tbody tr.clickable:hover { background: #F6F9FB; }
+
+/* ---------- Responsive tables ---------- */
+/* Wide tables didn't reflow at all below the sidebar-collapse breakpoint —
+   just squeezed columns illegibly. Horizontal scroll + a sticky first
+   column (the row's identifying ID) keeps every table usable on a
+   tablet/narrow width without a full stacked-card rewrite. */
+.table-scroll { overflow-x: auto; }
+.table-scroll table th:first-child,
+.table-scroll table td:first-child { position: sticky; left: 0; z-index: 1; }
+.table-scroll table th:first-child { background: #FBFCFD; }
+.table-scroll table td:first-child { background: var(--white); }
+.table-scroll tbody tr.clickable:hover td:first-child { background: #F6F9FB; }
+.mono { font-family: var(--mono); font-size: 12px; }
+.mono-sm { font-family: var(--mono); font-size: 11px; }
+
+/* ---------- Badges ---------- */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 11px; font-weight: 600;
+}
+.badge .bdot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.b-ok   { background: var(--ok-bg);   color: var(--ok); }
+.b-warn { background: var(--warn-bg); color: var(--warn); }
+.b-bad  { background: var(--bad-bg);  color: var(--bad); }
+.b-info { background: #DBEAFE; color: #1D4ED8; }
+.b-type { background: #EEF2F6; color: var(--teal); }
+/* Sealed = final/closed, deliberately distinct from "Verified" (b-ok,
+   green = confirmed good) — sealed isn't a quality judgement, it's a
+   locked, no-further-changes state. Every status badge used to render
+   identically as b-ok regardless of actual value. */
+.b-sealed { background: #E2E8F0; color: var(--navy); }
+.status-legend {
+  display: flex; flex-wrap: wrap; gap: 14px 20px;
+  font-size: 11.5px; color: var(--muted); padding: 12px 20px;
+  border-top: 1px solid var(--line);
+}
+.status-legend .sl-item { display: flex; align-items: center; gap: 6px; }
+
+/* ---------- Forms ---------- */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 18px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.full { grid-column: 1 / -1; }
+.field label {
+  font-size: 12px; font-weight: 600; color: var(--ink);
+}
+.field label .req { color: var(--bad); }
+.field .desc { font-size: 11px; color: var(--muted); font-weight: 400; }
+input, select, textarea {
+  font-family: var(--sans); font-size: 13px;
+  padding: 9px 11px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--white); color: var(--ink);
+  transition: border-color .15s, box-shadow .15s;
+  width: 100%;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--deep);
+  box-shadow: 0 0 0 3px rgba(6,90,130,.1);
+}
+input.mono, textarea.mono { font-family: var(--mono); font-size: 12px; }
+textarea { resize: vertical; min-height: 70px; }
+input[type=file] { padding: 7px; font-size: 12px; }
+.static-field {
+  padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--cream); font-size: 13px; color: var(--ink);
+  display: flex; align-items: center; gap: 8px;
+}
+.field-note {
+  font-size: 11px; color: var(--muted);
+  display: flex; align-items: center; gap: 6px;
+}
+.field-note.ok { color: var(--ok); }
+
+/* ---------- Buttons ---------- */
+.btn {
+  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  padding: 9px 17px; border-radius: 8px; cursor: pointer;
+  border: 1px solid transparent; display: inline-flex;
+  align-items: center; gap: 8px; transition: filter .15s, background .15s;
+}
+.btn-primary { background: var(--deep); color: var(--white); }
+.btn-primary:hover { filter: brightness(1.1); }
+.btn-ghost { background: var(--white); color: var(--ink); border-color: var(--line); }
+.btn-ghost:hover { background: var(--cream); }
+.btn-navy { background: var(--navy); color: var(--white); }
+.btn-navy:hover { filter: brightness(1.25); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-row { display: flex; gap: 10px; margin-top: 4px; }
+
+/* ---------- Detail view ---------- */
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); }
+.detail-cell { background: var(--white); padding: 14px 20px; }
+.detail-cell.full { grid-column: 1 / -1; }
+.detail-k {
+  font-size: 10.5px; letter-spacing: .6px; text-transform: uppercase;
+  color: var(--muted); font-weight: 600; margin-bottom: 4px;
+}
+.detail-v { font-size: 13.5px; color: var(--ink); word-break: break-all; white-space: pre-line; }
+
+/* ---------- Timeline (chain of custody) ---------- */
+.timeline { position: relative; padding-left: 26px; }
+.timeline::before {
+  content: ''; position: absolute; left: 7px; top: 6px; bottom: 6px;
+  width: 2px; background: var(--line);
+}
+.tl-item { position: relative; padding-bottom: 20px; }
+.tl-item:last-child { padding-bottom: 0; }
+/* History is immutable — was a 14x14 rounded-square outline (unchecked-
+   checkbox shape), with the genesis entry a solid filled square (a
+   *checked*-checkbox shape). A plain filled dot is the standard, clearly
+   non-interactive timeline-marker convention; nothing here should look
+   toggleable. */
+.tl-item::before {
+  content: ''; position: absolute; left: -22px; top: 5px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--teal);
+}
+.tl-item.genesis::before { background: var(--deep); box-shadow: 0 0 0 3px rgba(6,90,130,.15); }
+.tl-head { display: flex; align-items: center; gap: 9px; margin-bottom: 3px; }
+.tl-action { font-size: 13px; font-weight: 600; color: var(--ink); }
+.tl-time { font-size: 11.5px; color: var(--muted); }
+.tl-tx { font-family: var(--mono); font-size: 11px; color: var(--teal); }
+.tl-detail { font-size: 12px; color: var(--muted); }
+.tl-reason {
+  font-size: 12px; color: var(--ink); margin-top: 4px;
+  padding: 6px 9px; background: var(--cream); border-radius: 6px;
+  border-left: 2px solid var(--teal);
+}
+
+/* ---------- Verify result ---------- */
+.verify-box {
+  border-radius: 10px; padding: 16px 18px; margin-top: 4px;
+  border: 1px solid;
+}
+.verify-box.pass { background: var(--ok-bg); border-color: #86EFAC; }
+.verify-box.fail { background: var(--bad-bg); border-color: #FCA5A5; }
+.verify-head { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+.verify-head .vt { font-size: 14px; font-weight: 700; }
+.verify-box.pass .vt { color: var(--ok); }
+.verify-box.fail .vt { color: var(--bad); }
+/* Was a fixed-width inline-block label followed by inline text — on a
+   narrow viewport, or with a long value like the artefact-match sentence,
+   the text just wrapped underneath the label with no visual relationship
+   between the two. A real 2-column grid keeps label/value aligned and
+   collapses to a single column below 480px instead of overlapping. */
+.verify-row {
+  display: grid; grid-template-columns: 128px 1fr; gap: 4px 10px;
+  font-size: 11.5px; margin: 5px 0; color: var(--ink); align-items: start;
+}
+.verify-row .vk { color: var(--muted); }
+@media (max-width: 480px) {
+  .verify-row { grid-template-columns: 1fr; gap: 1px; }
+}
+
+/* ---------- Hash / CID display: consistent truncation + copy ---------- */
+.hash-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 11px; color: var(--ink);
+  background: var(--cream); border: 1px solid var(--line);
+  border-radius: 6px; padding: 3px 4px 3px 8px; max-width: 100%;
+}
+.hash-chip .hc-val { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hash-chip .hc-copy {
+  flex-shrink: 0; border: none; background: none; cursor: pointer;
+  color: var(--muted); padding: 3px; border-radius: 4px; display: grid; place-items: center;
+}
+.hash-chip .hc-copy:hover { background: var(--line); color: var(--ink); }
+.hash-chip .hc-copy:focus-visible { outline: 2px solid var(--deep); outline-offset: 1px; }
+.hash-chip .hc-copy.copied { color: var(--ok); }
+
+/* ---------- Empty state ---------- */
+.empty {
+  text-align: center; padding: 46px 20px; color: var(--muted);
+}
+.empty-glyph {
+  width: 52px; height: 52px; margin: 0 auto 14px;
+  border: 2px dashed var(--mint); border-radius: 12px;
+  display: grid; place-items: center;
+}
+.empty h4 { font-size: 14px; color: var(--ink); margin-bottom: 4px; }
+.empty p { font-size: 12.5px; }
+
+/* ---------- Toast ---------- */
+.toast-wrap {
+  position: fixed; bottom: 24px; right: 24px; z-index: 100;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.toast {
+  background: var(--navy); color: var(--white);
+  padding: 13px 17px; border-radius: 10px;
+  box-shadow: var(--shadow-lg); font-size: 12.5px;
+  display: flex; align-items: center; gap: 10px;
+  min-width: 260px; animation: slideIn .3s ease;
+  border-left: 3px solid var(--teal);
+}
+.toast.ok   { border-left-color: #34D399; }
+.toast.bad  { border-left-color: #F87171; }
+@keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
+
+/* ---------- Modal ---------- */
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(15,23,42,.5);
+  display: none; place-items: center; z-index: 90; padding: 24px;
+}
+.modal-bg.show { display: grid; }
+.modal {
+  background: var(--white); border-radius: 14px;
+  box-shadow: var(--shadow-lg); width: 100%; max-width: 440px;
+  overflow: hidden; animation: fade .2s ease;
+}
+.modal-head {
+  padding: 18px 22px 14px; border-bottom: 1px solid var(--line);
+}
+.modal-head h3 { font-family: var(--serif); font-size: 17px; font-weight: 600; }
+.modal-head p { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.modal-body { padding: 18px 22px; }
+.modal-foot {
+  padding: 14px 22px; border-top: 1px solid var(--line);
+  display: flex; justify-content: flex-end; gap: 10px;
+  background: #FBFCFD;
+}
+
+/* ---------- Helper text ---------- */
+.inline-link {
+  color: var(--deep); cursor: pointer; font-weight: 600;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.divider-text {
+  font-size: 11px; color: var(--muted); text-align: center;
+  margin: 14px 0; position: relative;
+}
+.code-hash {
+  font-family: var(--mono); font-size: 11px;
+  background: var(--cream); border: 1px solid var(--line);
+  border-radius: 6px; padding: 7px 10px; word-break: break-all;
+  color: var(--ink);
+}
+.spin {
+  width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3);
+  border-top-color: var(--white); border-radius: 50%;
+  animation: rot .6s linear infinite; display: inline-block;
+}
+@keyframes rot { to { transform: rotate(360deg); } }
+
+@media (max-width: 880px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .stat-grid { grid-template-columns: repeat(2,1fr); }
+  .cols { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- Court-ready export (print) ----------
+   #printReport is built fresh from live data by App.printReport() and is
+   the ONLY thing visible when printing — the app chrome (sidebar, nav,
+   buttons, toasts, any open modal) is hidden outright rather than
+   attempting to make the interactive UI itself print-legible. Legible in
+   black-and-white by construction: plain bordered tables, no colour-only
+   meaning anywhere in the report. */
+#printReport { display: none; }
+@media print {
+  body > *:not(#printReport) { display: none !important; }
+  #printReport {
+    display: block !important; max-width: 100%; color: #000; background: #fff;
+    font-family: var(--sans); font-size: 12px; padding: 0;
+  }
+  #printReport h1 { font-family: var(--serif); font-size: 20px; margin-bottom: 2px; }
+  #printReport h2 {
+    font-size: 13px; margin: 18px 0 8px; padding-top: 10px;
+    border-top: 1px solid #000;
+  }
+  #printReport .pr-meta { font-size: 11px; color: #333; margin-bottom: 4px; }
+  #printReport .pr-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+  #printReport .pr-table th, #printReport .pr-table td {
+    border: 1px solid #999; padding: 5px 8px; text-align: left;
+    font-size: 11px; vertical-align: top; white-space: pre-line;
+  }
+  #printReport .pr-table th { width: 190px; background: #f0f0f0; font-weight: 600; }
+  #printReport .pr-mono { font-family: var(--mono); font-size: 10px; word-break: break-all; }
+  #printReport .pr-footer { margin-top: 16px; font-size: 10px; color: #333; }
+  @page { margin: 16mm; }
+}
+
+/* ---------- Login overlay ---------- */
+#loginOverlay { position: fixed; inset: 0; z-index: 200; }
+.login-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--deep) 100%);
+  display: grid; place-items: center; padding: 24px;
+}
+.login-card {
+  background: var(--white); border-radius: 16px;
+  box-shadow: var(--shadow-lg); width: 100%; max-width: 400px;
+  padding: 32px 30px;
+}
+.login-brand { display: flex; align-items: center; gap: 11px; margin-bottom: 22px; }
+.login-title {
+  font-family: var(--serif); font-size: 22px; font-weight: 600;
+  color: var(--ink); margin-bottom: 5px;
+}
+.login-sub { font-size: 12.5px; color: var(--muted); margin-bottom: 22px; line-height: 1.5; }
+.login-error {
+  font-size: 12px; color: var(--bad); min-height: 16px; margin-top: 4px;
+}
+.login-hint {
+  font-size: 11px; color: var(--muted); margin-top: 16px;
+  padding-top: 14px; border-top: 1px solid var(--line); line-height: 1.6;
+}
+.login-hint b { color: var(--teal); font-weight: 600; }
+.logout-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--muted); font-size: 11px; font-family: var(--sans);
+  padding: 4px 8px; border-radius: 6px;
+}
+.logout-btn:hover { background: var(--cream); color: var(--ink); }
+
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN OVERLAY ===================== -->
+<div id="loginOverlay" style="display:block">
+  <div class="login-bg">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="brand-glyph"></div>
+        <div>
+          <div class="brand-name" style="color:var(--ink)">DEMS</div>
+          <div class="brand-sub" style="color:var(--muted)">Evidence Ledger</div>
+        </div>
+      </div>
+      <h2 class="login-title">Officer Sign-In</h2>
+      <p class="login-sub">Authenticate to register and verify evidence. Your
+        session is bound to your enrolled blockchain identity.</p>
+      <div class="field" style="margin-bottom:13px">
+        <label for="loginUser">Username</label>
+        <input type="text" id="loginUser" placeholder="Officer username" autocomplete="username">
+      </div>
+      <div class="field" style="margin-bottom:6px">
+        <label for="loginPass">Password</label>
+        <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div id="loginError" class="login-error"></div>
+      <button class="btn btn-primary" id="loginBtn" onclick="App.doLogin()"
+              style="width:100%;justify-content:center;margin-top:10px">Sign In</button>
+      <div class="login-hint">
+        Contact your system administrator if you do not have credentials.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <div class="brand-glyph"></div>
+        <div>
+          <div class="brand-name">DEMS</div>
+          <div class="brand-sub">Evidence Ledger</div>
+        </div>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-label">Operations</div>
+      <button class="nav-item active" data-view="dashboard">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-item" data-view="register">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Register Evidence
+      </button>
+      <button class="nav-item" data-view="registry">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        Evidence Registry
+      </button>
+      <button class="nav-item" data-view="cases">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+        Case Register
+      </button>
+      <div class="nav-label">Administration</div>
+      <button class="nav-item" data-view="admin">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Network &amp; Ledger
+      </button>
+    </nav>
+    <div class="net-card">
+      <div class="net-row">
+        <span class="net-dot" id="netDot"></span>
+        <span class="net-title" id="netTitle">Connected</span>
+      </div>
+      <!-- Infrastructure detail (channel/chaincode/officer identities) —
+           admin role + SHOW_INFRA only, enforced server-side by
+           /api/system-info returning 404 otherwise. Regular users get
+           only the connected/offline dot+label above. -->
+      <div class="net-meta" id="netMeta" hidden>
+        Network: <b>Hyperledger Fabric v2.5.9</b><br>
+        Channel: <b id="netChannel">—</b> &nbsp;·&nbsp; Orderer: <b>Raft</b><br>
+        Chaincode: <b id="netChaincode">—</b>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-title">
+        <h1 id="pageTitle">Dashboard</h1>
+        <p id="pageSub">Forensic evidence overview and ledger status</p>
+      </div>
+      <div class="topbar-actions">
+        <div class="user-chip">
+          <div class="user-av" id="userAv">JI</div>
+          <div class="user-meta">
+            <b id="userName">Juma Ismail</b>
+            <span id="userRole">Investigating Officer</span>
+          </div>
+          <button class="logout-btn" id="logoutBtn" onclick="App.doLogout()"
+                  style="display:none">Sign out</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ============ DASHBOARD ============ -->
+      <section class="view active" id="view-dashboard">
+        <div class="stat-grid">
+          <div class="stat s-deep clickable" onclick="App.go('registry')">
+            <div class="stat-label">Evidence Items</div>
+            <div class="stat-value" id="stEvidence">0</div>
+            <div class="stat-foot">across all open cases &rarr;</div>
+          </div>
+          <div class="stat s-navy clickable" onclick="App.go('cases')">
+            <div class="stat-label">Active Cases</div>
+            <div class="stat-value" id="stCases">0</div>
+            <div class="stat-foot"><b id="stCasesTotal">0</b> case(s) total &rarr;</div>
+          </div>
+          <div class="stat s-ok">
+            <div class="stat-label">Integrity Verified</div>
+            <div class="stat-value" id="stVerified">0</div>
+            <div class="stat-foot"><b id="stVerifiedPct">0%</b> metadata hash verified</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Ledger Transactions</div>
+            <!-- A bare "—" next to a green LIVE indicator read as broken,
+                 not "not yet computed". This can't be cheap to compute
+                 automatically (needs one chain call per evidence item —
+                 see /api/stats/txcount) so it stays on-demand, but the
+                 default state now says so explicitly instead of looking
+                 like a stat that failed to load. -->
+            <!-- stTxns and stTxnsAction are SIBLINGS, not nested — renderDashboard()
+                 and computeTxCount() both set stTxns.textContent directly (a plain
+                 number slot), which would silently wipe out any element nested
+                 inside it. Not computed yet is smaller/muted text, not a lone "—"
+                 that could pass for a rendering glitch. -->
+            <div class="stat-value" id="stTxns" style="font-size:19px;line-height:1.4;color:var(--muted)">Not computed</div>
+            <div class="stat-foot">committed on-chain &middot;
+              <span class="inline-link" id="stTxnsAction" onclick="App.computeTxCount()">Show count</span></div>
+          </div>
+        </div>
+
+        <div class="cols" id="dashCols">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Recent Evidence</h3>
+              <span class="hint">latest registrations</span>
+            </div>
+            <div class="panel-body flush">
+              <table>
+                <thead><tr><th>Evidence ID</th><th>Case</th><th>Type</th><th>Status</th></tr></thead>
+                <tbody id="recentRows"></tbody>
+              </table>
+              <div id="recentEmpty"></div>
+            </div>
+          </div>
+          <!-- Admin role + SHOW_INFRA only (see /api/system-info) — regular
+               users never see network/chaincode internals. -->
+          <div class="panel" id="topologyPanel" hidden>
+            <div class="panel-head"><h3>Network Topology</h3></div>
+            <div class="panel-body">
+              <div class="detail-k">Blockchain Framework</div>
+              <div class="detail-v" style="margin-bottom:12px">Hyperledger Fabric v2.5.9</div>
+              <div class="detail-k">Ordering Service</div>
+              <div class="detail-v" style="margin-bottom:12px">Raft &nbsp;·&nbsp; BatchTimeout 500&nbsp;ms &nbsp;·&nbsp; MaxMessageCount 100</div>
+              <div class="detail-k">Channel</div>
+              <div class="detail-v" style="margin-bottom:12px"><span class="mono" id="topoChannel">—</span></div>
+              <div class="detail-k">Chaincode</div>
+              <div class="detail-v" style="margin-bottom:12px"><span class="mono" id="topoChaincode">—</span> &nbsp;(EvidenceContract, Go)</div>
+              <div class="detail-k">Endorsing Organisations</div>
+              <div class="detail-v">Org1 &nbsp;·&nbsp; Org2</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ REGISTER ============ -->
+      <section class="view" id="view-register">
+        <div class="section-head">
+          <h2>Register New Evidence</h2>
+          <p>Adds a new evidence item to the tamper-evident ledger.</p>
+        </div>
+        <div class="cols">
+          <div class="panel">
+            <div class="panel-head"><h3>Evidence Details</h3></div>
+            <div class="panel-body">
+              <div class="form-grid">
+                <div class="field">
+                  <label for="fEvId">Evidence ID <span class="req">*</span></label>
+                  <input type="text" id="fEvId" class="mono" placeholder="EV-2026-0001">
+                </div>
+                <div class="field">
+                  <label for="fCaseId">Case ID <span class="req">*</span></label>
+                  <input type="text" id="fCaseId" class="mono" placeholder="CASE-2026-014">
+                </div>
+                <div class="field">
+                  <label for="fType">Evidence Type <span class="req">*</span></label>
+                  <select id="fType">
+                    <option value="">Select type…</option>
+                    <option>Document</option>
+                    <option>Disk Image</option>
+                    <option>Photograph</option>
+                    <option>Video Recording</option>
+                    <option>Audio Recording</option>
+                    <option>Mobile Device Extract</option>
+                    <option>Network Capture</option>
+                    <option>Memory Dump</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Collecting Officer</label>
+                  <div class="desc">The signed-in officer's certificate signs this transaction — not user-selectable.</div>
+                  <!-- Static text, not a <select>: this is always exactly
+                       the authenticated session identity (enforced
+                       server-side too — see requireAuth on POST
+                       /api/evidence), never actually a choice. A disabled
+                       dropdown still looks like a dropdown; this doesn't. -->
+                  <div class="static-field" id="fOfficerDisplay">Sign in to continue</div>
+                  <input type="hidden" id="fOfficer" value="">
+                </div>
+                <div class="field">
+                  <label for="fLocation">Location / Source Found</label>
+                  <div class="desc">Where the item was collected from — NIST SP 800-86 / ISO 27037 require this at acquisition time.</div>
+                  <input type="text" id="fLocation" placeholder="e.g. Finance Dept., 3rd floor server room">
+                </div>
+                <div class="field">
+                  <label for="fCondition">Condition at Collection</label>
+                  <div class="desc">Physical/operational state when found — e.g. powered on, screen locked, visible damage.</div>
+                  <input type="text" id="fCondition" placeholder="e.g. Powered on, unlocked session">
+                </div>
+                <div class="field full">
+                  <label for="fDesc">Description <span class="req">*</span></label>
+                  <textarea id="fDesc" placeholder="Brief description of the evidence item and the circumstances of its collection…"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Cryptographic Fingerprint</h3>
+            </div>
+            <div class="panel-body">
+              <div class="field" style="margin-bottom:14px">
+                <label for="fFile">Artefact File</label>
+                <div class="desc">Uploads the file to IPFS and computes its cryptographic hash. Only the hash and content identifier are written on-chain — never the raw file.</div>
+                <input type="file" id="fFile" onchange="App.hashFile()">
+              </div>
+              <div class="field" style="margin-bottom:14px">
+                <label for="fHash">SHA-256 Hash <span class="req">*</span></label>
+                <input type="text" id="fHash" class="mono" placeholder="computed from the artefact file…">
+                <div class="field-note" id="hashNote">Upload a file, or paste a known hash for a metadata-only record.</div>
+              </div>
+              <div class="field">
+                <label for="fCid">IPFS Content Identifier</label>
+                <div class="desc">Filled in automatically after uploading an artefact file above.</div>
+                <input type="text" id="fCid" class="mono" placeholder="Qm… (optional)">
+              </div>
+              <div class="btn-row" style="margin-top:18px">
+                <button class="btn btn-primary" id="btnRegister" onclick="App.register()">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+                  Commit to Ledger
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ REGISTRY ============ -->
+      <section class="view" id="view-registry">
+        <div class="section-head">
+          <h2>Evidence Registry</h2>
+          <p>Complete on-chain evidence holdings.</p>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h3>All Registered Evidence</h3>
+            <input type="text" id="searchBox" aria-label="Search evidence by ID, case, or type" placeholder="Search by ID, case, or type…"
+                   style="width:240px" oninput="App.registrySearch()">
+          </div>
+          <div class="panel-body flush">
+            <div class="table-scroll"><table>
+              <thead><tr>
+                <th>Evidence ID</th><th>Case</th><th>Type</th>
+                <th>Registered</th><th>Status</th><th></th>
+              </tr></thead>
+              <tbody id="registryRows"></tbody>
+            </table></div>
+            <div id="registryEmpty"></div>
+            <div class="pager">
+              <span id="registryPagerInfo"></span>
+              <div class="btn-row">
+                <button class="btn btn-ghost btn-sm" id="registryPrevBtn" onclick="App.registryGoToPage(-1)">&larr; Prev</button>
+                <button class="btn btn-ghost btn-sm" id="registryNextBtn" onclick="App.registryGoToPage(1)">Next &rarr;</button>
+              </div>
+            </div>
+            <div class="status-legend">
+              <span class="sl-item"><span class="badge b-info"><span class="bdot"></span>Registered</span> newly logged</span>
+              <span class="sl-item"><span class="badge b-warn"><span class="bdot"></span>In Analysis</span> under examination</span>
+              <span class="sl-item"><span class="badge b-ok"><span class="bdot"></span>Verified</span> findings confirmed</span>
+              <span class="sl-item"><span class="badge b-sealed"><span class="bdot"></span>Sealed</span> finalised, locked</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ CASE REGISTER ============ -->
+      <section class="view" id="view-cases">
+        <div class="section-head">
+          <h2>Case Register</h2>
+          <p>A case stays <b>Active</b> until every piece of evidence in it has been sealed, at which point it's <b>Closed</b>.</p>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h3>All Cases</h3>
+            <input type="text" id="caseSearchBox" aria-label="Search cases by case ID" placeholder="Search by case ID…"
+                   style="width:220px" oninput="App.casesSearch()">
+          </div>
+          <div class="panel-body flush">
+            <div class="table-scroll"><table>
+              <thead><tr>
+                <th>Case ID</th><th>Evidence Items</th><th>Status</th>
+                <th>Last Activity</th><th></th>
+              </tr></thead>
+              <tbody id="caseRows"></tbody>
+            </table></div>
+            <div id="caseEmpty"></div>
+            <div class="pager">
+              <span id="casesPagerInfo"></span>
+              <div class="btn-row">
+                <button class="btn btn-ghost btn-sm" id="casesPrevBtn" onclick="App.casesGoToPage(-1)">&larr; Prev</button>
+                <button class="btn btn-ghost btn-sm" id="casesNextBtn" onclick="App.casesGoToPage(1)">Next &rarr;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ CASE DETAIL ============ -->
+      <section class="view" id="view-case-detail">
+        <div class="section-head">
+          <span class="inline-link" onclick="App.go('cases')">&larr; Back to Case Register</span>
+          <h2 id="cTitle" style="margin-top:6px">Case Detail</h2>
+          <p id="cSub"></p>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Evidence in this Case</h3></div>
+          <div class="panel-body flush">
+            <div class="table-scroll"><table>
+              <thead><tr>
+                <th>Evidence ID</th><th>Type</th><th>Custodian</th>
+                <th>Registered</th><th>Status</th><th></th>
+              </tr></thead>
+              <tbody id="caseDetailRows"></tbody>
+            </table></div>
+            <div class="status-legend">
+              <span class="sl-item"><span class="badge b-info"><span class="bdot"></span>Registered</span> newly logged</span>
+              <span class="sl-item"><span class="badge b-warn"><span class="bdot"></span>In Analysis</span> under examination</span>
+              <span class="sl-item"><span class="badge b-ok"><span class="bdot"></span>Verified</span> findings confirmed</span>
+              <span class="sl-item"><span class="badge b-sealed"><span class="bdot"></span>Sealed</span> finalised, locked</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ DETAIL ============ -->
+      <section class="view" id="view-detail">
+        <div class="section-head" style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+          <div>
+            <span class="inline-link" onclick="App.go('registry')">&larr; Back to Registry</span>
+            <h2 id="dTitle" style="margin-top:6px">Evidence Detail</h2>
+            <p>Verify integrity and inspect the chain of custody below.</p>
+          </div>
+          <button class="btn btn-ghost" onclick="App.printReport()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+            Print / Export Report
+          </button>
+        </div>
+        <div class="cols">
+          <div>
+            <div class="panel">
+              <div class="panel-head"><h3>Evidence Record</h3><span class="hint" id="dStatus"></span></div>
+              <div class="panel-body flush">
+                <div class="detail-grid" id="detailGrid"></div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head">
+                <h3>Chain of Custody</h3>
+                <span class="hint">full audit trail</span>
+              </div>
+              <div class="panel-body">
+                <div class="timeline" id="custodyTimeline"></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="panel">
+              <div class="panel-head"><h3>Integrity Verification</h3></div>
+              <div class="panel-body">
+                <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px">
+                  Recomputes the cryptographic fingerprint and compares it to the
+                  stored value, confirming the record hasn't been altered.
+                </p>
+                <button class="btn btn-navy" id="btnVerify" onclick="App.verify()" style="width:100%;justify-content:center">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+                  Run Integrity Check
+                </button>
+                <div id="verifyResult"></div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head">
+                <h3>Transfer Custody</h3>
+                <span class="hint">chain of custody</span>
+              </div>
+              <div class="panel-body">
+                <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px">
+                  Only the <b>current custodian</b> may hand an item off — the
+                  chaincode itself enforces this. Signed in as someone else,
+                  the transaction is rejected on-chain, not just in this UI.
+                </p>
+                <div class="field" style="margin-bottom:10px">
+                  <label for="fTransferTo">Transfer to</label>
+                  <select id="fTransferTo"><option value="">Sign in to select an officer…</option></select>
+                </div>
+                <div class="field" style="margin-bottom:14px">
+                  <label for="fTransferStatus">New status</label>
+                  <select id="fTransferStatus">
+                    <option value="">(keep current status)</option>
+                    <option value="InAnalysis">In Analysis</option>
+                    <option value="Verified">Verified</option>
+                    <option value="Sealed">Sealed</option>
+                    <option value="Registered">Registered</option>
+                  </select>
+                </div>
+                <div class="field" style="margin-bottom:14px">
+                  <label for="fTransferReason">Reason for transfer <span class="req">*</span></label>
+                  <div class="desc">Required — NIST SP 800-86 / ISO 27037 / SWGDE all treat the reason for a custody handoff as part of the record, not just who and when. Recorded on-chain, permanently.</div>
+                  <textarea id="fTransferReason" placeholder="e.g. Released to forensic lab for detailed analysis" style="min-height:52px"></textarea>
+                </div>
+                <button class="btn btn-navy" id="btnTransfer" onclick="App.transferCustody()" style="width:100%;justify-content:center" disabled>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                  Transfer Custody
+                </button>
+                <div id="transferResult" style="margin-top:10px"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ ADMIN ============ -->
+      <section class="view" id="view-admin">
+        <div class="section-head">
+          <h2>Network &amp; Ledger Administration</h2>
+          <p>Connection settings and ledger lifecycle operations.</p>
+        </div>
+        <div class="cols">
+          <div class="panel">
+            <div class="panel-head"><h3>Backend Connection</h3></div>
+            <div class="panel-body">
+              <div class="field">
+                <label for="apiBase">Backend API Base URL</label>
+                <div class="desc">The Fabric Gateway REST backend. Default points to the local Node.js gateway server.</div>
+                <input type="text" id="apiBase" class="mono" readonly style="background:var(--cream);cursor:not-allowed">
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Dev-tools only: InitLedger is a one-time setup operation, not a
+             routine one, and this table is a chaincode reference, not
+             something an operator needs day-to-day. Hidden unless the
+             backend has DEV_TOOLS=true set. -->
+        <div id="devToolsPanel" hidden>
+          <div class="cols">
+            <div class="panel">
+              <div class="panel-head"><h3>Ledger Lifecycle</h3><span class="hint">dev tools</span></div>
+              <div class="panel-body">
+                <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px">
+                  Seeds the channel with a single baseline evidence entry. A one-time
+                  setup step, invoked immediately after chaincode commit — not a
+                  routine operation.
+                </p>
+                <button class="btn btn-primary" onclick="App.initLedger()" style="width:100%;justify-content:center">
+                  Invoke InitLedger
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>EvidenceContract Operations</h3><span class="hint">chaincode interface — dev reference</span></div>
+            <div class="panel-body flush">
+              <table>
+                <thead><tr><th>Operation</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td class="mono">InitLedger</td><td><span class="badge b-info"><span class="bdot"></span>Submit</span></td><td>Seeds the ledger with one baseline entry (one-time setup)</td></tr>
+                  <tr><td class="mono">RegisterEvidence</td><td><span class="badge b-info"><span class="bdot"></span>Submit</span></td><td>Records a new evidence item with status “Registered”</td></tr>
+                  <tr><td class="mono">GetEvidence</td><td><span class="badge b-type"><span class="bdot"></span>Evaluate</span></td><td>Returns a single evidence record by identifier</td></tr>
+                  <tr><td class="mono">GetAllEvidence</td><td><span class="badge b-type"><span class="bdot"></span>Evaluate</span></td><td>Returns every evidence record on the channel</td></tr>
+                  <tr><td class="mono">VerifyIntegrity</td><td><span class="badge b-type"><span class="bdot"></span>Evaluate</span></td><td>Recomputes and compares the SHA-256 fingerprint</td></tr>
+                  <tr><td class="mono">GetEvidenceHistory</td><td><span class="badge b-type"><span class="bdot"></span>Evaluate</span></td><td>Returns the full transaction history for a record</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- Modal — generic dialog shell, reused for the Transfer Custody
+     confirmation and the idle-timeout warning. Buttons are injected by
+     App._openModal(), not hardcoded, since the two use different actions
+     (Confirm/Cancel vs. Stay signed in/Sign out now). -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head"><h3 id="modalTitle"></h3><p id="modalSub"></p></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div>
+</div>
+
+<!-- Court-ready export target — populated by App.printReport(), the only
+     thing left visible when @media print takes over. See its CSS above. -->
+<div id="printReport"></div>
+
+<script src="/config.js"></script>
+<script>
+/* ================================================================
+   DATA LAYER
+   LedgerLive — REST calls to the Fabric Gateway backend. This is the
+   only ledger implementation: the in-browser demo/mock ledger that used
+   to stand in for it has been removed for production — every read and
+   write in this app now goes to the real Hyperledger Fabric network.
+   ================================================================ */
+
+// Every evidence field (description, case ID, evidence ID, type) is
+// free-text supplied by an officer and gets rendered via innerHTML
+// throughout this page. Without escaping, a description like
+// '<img src=x onerror=...>' would execute in the browser of anyone who
+// later opens that record — a stored-XSS hole in a system whose entire
+// premise is evidentiary integrity. Every user-influenced value rendered
+// below is wrapped in this.
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
+// The chaincode's EvidenceStatus values (evidence.go) — every status
+// badge in the app used to render identically (hardcoded b-ok/green)
+// regardless of actual value. One definition, one color each, reused
+// everywhere. Note: TransferCustody itself enforces no state machine —
+// any status can follow any other via a transfer — so these describe
+// MEANING, not guaranteed transitions; the legend says so.
+const STATUS_META = {
+  Registered: { cls: 'b-info',   label: 'Registered', desc: 'Newly logged, not yet reviewed.' },
+  InAnalysis: { cls: 'b-warn',   label: 'In Analysis', desc: 'Currently under forensic examination.' },
+  Verified:   { cls: 'b-ok',     label: 'Verified',    desc: 'Examination complete, findings confirmed.' },
+  Sealed:     { cls: 'b-sealed', label: 'Sealed',      desc: 'Finalised and locked — no further changes expected.' },
+};
+
+// Integrity verification and the exact ledger-transaction sweep both
+// moved server-side (see /api/stats and /api/stats/txcount) — the backend
+// already holds the cached full evidence list, so it can compute both far
+// more cheaply than shipping the whole ledger to the browser first.
+
+const LedgerLive = {
+  token: null,
+  // Read-only, backend-driven config — see /config.js. Falls back to a
+  // same-origin relative path if config.js somehow failed to load.
+  base: () => ((window.DEMS_CONFIG && window.DEMS_CONFIG.apiBase) || '/api').replace(/\/+$/, ''),
+  _headers(extra) {
+    const h = Object.assign({}, extra || {});
+    if (this.token) h['Authorization'] = 'Bearer ' + this.token;
+    return h;
+  },
+  async _get(path) {
+    const r = await fetch(this.base() + path, { headers: this._headers() });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || ('HTTP ' + r.status));
+    return r.json();
+  },
+  async _post(path, body) {
+    const r = await fetch(this.base() + path, {
+      method: 'POST',
+      headers: this._headers({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(body),
+    });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || ('HTTP ' + r.status));
+    return r.json();
+  },
+  login(username, password) { return this._post('/login', { username, password }); },
+  logout()                  { return this._post('/logout', {}); },
+  initLedger()            { return this._post('/init', {}); },
+  registerEvidence(rec)   { return this._post('/evidence', rec); },
+  getEvidence(id)         { return this._get('/evidence/' + encodeURIComponent(id)); },
+  getAllEvidence()        { return this._get('/evidence'); },
+  verifyIntegrity(id)     { return this._get('/evidence/' + encodeURIComponent(id) + '/verify'); },
+  getEvidenceHistory(id)  { return this._get('/evidence/' + encodeURIComponent(id) + '/history'); },
+  // v6: server-side paginated + searched evidence list. GetAllEvidence has
+  // no native pagination, so the backend caches one full fetch and slices
+  // it per request instead of every page load re-scanning the channel and
+  // shipping the whole ledger to the browser.
+  listEvidence({ page = 1, limit = 25, q = '', caseId = '' } = {}) {
+    const params = new URLSearchParams({ page, limit });
+    if (q) params.set('q', q);
+    if (caseId) params.set('caseId', caseId);
+    return this._get('/evidence?' + params.toString());
+  },
+  // v6: cases derived from the same cached evidence list, paginated.
+  listCases({ page = 1, limit = 25, q = '' } = {}) {
+    const params = new URLSearchParams({ page, limit });
+    if (q) params.set('q', q);
+    return this._get('/cases?' + params.toString());
+  },
+  // v6: cheap Dashboard aggregate — total/active-case/verified counts and
+  // recent items in one bounded response instead of fetching everything.
+  getStats() { return this._get('/stats'); },
+  // v6: exact ledger transaction count — explicit, throttled server-side
+  // sweep (see computeTxCount()), not run automatically.
+  getTxCount() { return this._get('/stats/txcount'); },
+  // v2: upload an artefact file to IPFS via the backend; returns {cid, contentHash, size}
+  async ipfsUpload(file) {
+    const r = await fetch(this.base() + '/ipfs/upload', {
+      method: 'POST',
+      headers: this._headers({ 'Content-Type': 'application/octet-stream',
+                 'X-Filename': file.name }),
+      body: file,
+    });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || ('HTTP ' + r.status));
+    return r.json();
+  },
+  // v3: list selectable named officers
+  listOfficers() { return this._get('/officers'); },
+  // v5: who is the current session bound to (used to restore a session
+  // across a page refresh without re-prompting for a password)
+  me()           { return this._get('/me'); },
+  // v7: infrastructure detail — admin role + SHOW_INFRA only; the backend
+  // 404s this for anyone else regardless of what the frontend tries to call.
+  getSystemInfo() { return this._get('/system-info'); },
+  // v5: chain-of-custody handoff — chaincode enforces that only the
+  // CURRENT custodian's signing identity may call this.
+  // v8: reason is required — see TransferCustodyWithReason in the
+  // chaincode (added, not a change to the original TransferCustody).
+  transferCustody(id, newCustodianId, newStatus, reason) {
+    return this._post('/evidence/' + encodeURIComponent(id) + '/transfer',
+      { newCustodianId, newStatus, reason });
+  },
+};
+
+/* ================================================================
+   APPLICATION CONTROLLER
+   ================================================================ */
+const App = {
+  currentId: null,
+  officerMap: {}, // identityId -> {username, displayName, orgLabel}
+
+  async boot() {
+    document.querySelectorAll('.nav-item').forEach(b =>
+      b.addEventListener('click', () => this.go(b.dataset.view)));
+    // allow Enter key to submit the login form
+    document.getElementById('loginPass').addEventListener('keydown', e => {
+      if (e.key === 'Enter') this.doLogin();
+    });
+    document.addEventListener('keydown', this._modalKeydown);
+
+    document.getElementById('apiBase').value = LedgerLive.base();
+    document.getElementById('devToolsPanel').hidden =
+      !(window.DEMS_CONFIG && window.DEMS_CONFIG.devTools);
+
+    // Restore a session across a page refresh so a reload doesn't force
+    // re-authentication. The login overlay is visible by default (see its
+    // markup) and only ever gets hidden once we have a verified session —
+    // there is no fallback content to show in the meantime.
+    const saved = this._loadSession();
+    if (saved && saved.token) {
+      LedgerLive.token = saved.token;
+      try {
+        const me = await LedgerLive.me();
+        this._officer = saved.officer || {
+          displayName: me.displayName, username: me.username,
+          identityId: me.identityId, orgLabel: '', role: me.role,
+        };
+        this._onAuthenticated();
+        return;
+      } catch (e) {
+        // token expired/invalid or backend unreachable
+        LedgerLive.token = null;
+        this._officer = null;
+        this._clearSession();
+      }
+    }
+
+    document.getElementById('loginUser').focus();
+  },
+
+  // Runs once, right after a successful login or a restored session:
+  // reflects the officer in the UI, hides the sign-in screen, persists
+  // the session, and loads real data. doLogin() and boot()'s session
+  // restore both funnel through here so they can never drift apart.
+  async _onAuthenticated() {
+    this._reflectOfficerUI(this._officer);
+    document.getElementById('loginOverlay').style.display = 'none';
+    this._saveSession();
+    await this._applyInfraVisibility();
+    this._startIdleWatch();
+    this.refreshAll();
+  },
+
+  // ---------- idle timeout ----------
+  // The 8-hour session on the backend is an ABSOLUTE expiry from login —
+  // it doesn't distinguish an officer idle for minutes from one actively
+  // working the whole time. This adds real inactivity detection on top:
+  // configurable warning-then-sign-out, independent of that absolute cap.
+  _idleEvents: ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'],
+  _startIdleWatch() {
+    this._stopIdleWatch();
+    this._idleActivityHandler = () => this._resetIdleTimer();
+    this._idleEvents.forEach(ev => document.addEventListener(ev, this._idleActivityHandler, { passive: true }));
+    this._resetIdleTimer();
+  },
+  _stopIdleWatch() {
+    if (this._idleActivityHandler) {
+      this._idleEvents.forEach(ev => document.removeEventListener(ev, this._idleActivityHandler));
+      this._idleActivityHandler = null;
+    }
+    clearTimeout(this._idleTimer);
+    clearInterval(this._idleWarnInterval);
+  },
+  _resetIdleTimer() {
+    clearTimeout(this._idleTimer);
+    const idleMs = (window.DEMS_CONFIG && window.DEMS_CONFIG.idleTimeoutMs) || 15 * 60 * 1000;
+    this._idleTimer = setTimeout(() => this._showIdleWarning(), idleMs);
+  },
+  // Deliberately does NOT auto-dismiss on ambient mouse movement while
+  // showing — an idle warning that vanishes on its own the moment a mouse
+  // twitches isn't actually confirming the officer is back; "Stay signed
+  // in" is the explicit acknowledgement.
+  _showIdleWarning() {
+    if (!LedgerLive.token) return;
+    const warnMs = (window.DEMS_CONFIG && window.DEMS_CONFIG.idleWarningMs) || 60 * 1000;
+    let remaining = Math.ceil(warnMs / 1000);
+    this._openModal({
+      title: 'Still there?',
+      sub: 'You’ll be signed out due to inactivity',
+      bodyHtml: `<p style="font-size:13px">For security, this session ends automatically in
+        <b id="idleCountdown">${remaining}</b>s of continued inactivity.</p>`,
+      buttons: [
+        { label: 'Sign out now', cls: 'btn-ghost', onClick: () => this.doLogout() },
+        { label: 'Stay signed in', cls: 'btn-primary', onClick: () => this._resetIdleTimer() },
+      ],
+    });
+    this._idleWarnInterval = setInterval(() => {
+      remaining--;
+      const el = document.getElementById('idleCountdown');
+      if (el) el.textContent = remaining;
+      if (remaining <= 0) {
+        clearInterval(this._idleWarnInterval);
+        this.closeModal();
+        this.doLogout();
+      }
+    }, 1000);
+  },
+
+  // Admin role + SHOW_INFRA only — the backend 404s /api/system-info for
+  // anyone else, this just decides whether to ask. Regular users keep the
+  // minimal connected/offline dot in the sidebar and no Network Topology
+  // card at all (the Dashboard collapses to a single column rather than
+  // showing a half-empty panel where it used to be).
+  async _applyInfraVisibility() {
+    const showInfra = !!(window.DEMS_CONFIG && window.DEMS_CONFIG.showInfra);
+    const isAdmin = this._officer && this._officer.role === 'admin';
+    const topologyPanel = document.getElementById('topologyPanel');
+    const netMeta = document.getElementById('netMeta');
+    const dashCols = document.getElementById('dashCols');
+    if (showInfra && isAdmin) {
+      try {
+        const info = await LedgerLive.getSystemInfo();
+        document.getElementById('netChannel').textContent = info.channel;
+        document.getElementById('netChaincode').textContent = info.chaincode;
+        document.getElementById('topoChannel').textContent = info.channel;
+        document.getElementById('topoChaincode').textContent = info.chaincode;
+        netMeta.hidden = false;
+        topologyPanel.hidden = false;
+        dashCols.style.gridTemplateColumns = '';
+        return;
+      } catch (_) { /* not enabled / not admin / unreachable — stay hidden */ }
+    }
+    netMeta.hidden = true;
+    topologyPanel.hidden = true;
+    dashCols.style.gridTemplateColumns = '1fr';
+  },
+
+  // ---------- session persistence (localStorage) ----------
+  _saveSession() {
+    try {
+      if (LedgerLive.token) {
+        localStorage.setItem('dems.session', JSON.stringify({
+          token: LedgerLive.token, officer: this._officer,
+        }));
+      } else {
+        localStorage.removeItem('dems.session');
+      }
+    } catch (_) { /* private-browsing / storage disabled — ignore */ }
+  },
+  _loadSession() {
+    try { return JSON.parse(localStorage.getItem('dems.session') || 'null'); }
+    catch (_) { return null; }
+  },
+  _clearSession() {
+    try { localStorage.removeItem('dems.session'); } catch (_) {}
+  },
+
+  // reflects a logged-in officer into the top-bar chip + locks the
+  // Register form's officer field to them. Shared by doLogin() and the
+  // boot()-time session restore so both paths stay in sync.
+  _reflectOfficerUI(officer) {
+    const initials = (officer.displayName || officer.username || '??')
+      .split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase();
+    document.getElementById('userAv').textContent = initials;
+    document.getElementById('userName').textContent = officer.displayName || officer.username;
+    document.getElementById('userRole').textContent =
+      officer.username + (officer.orgLabel ? ' · ' + officer.orgLabel : '');
+    document.getElementById('logoutBtn').style.display = '';
+    document.getElementById('fOfficer').value = officer.identityId;
+    document.getElementById('fOfficerDisplay').innerHTML =
+      `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
+      + `Signed by: <b>${esc(officer.username)}</b> — ${esc(officer.orgLabel || '')}`;
+  },
+
+  // ---------- authentication ----------
+  doLogin() {
+    const user = document.getElementById('loginUser').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const err  = document.getElementById('loginError');
+    const btn  = document.getElementById('loginBtn');
+    err.textContent = '';
+    if (!user || !pass) { err.textContent = 'Enter username and password.'; return; }
+    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Signing in…';
+    LedgerLive.login(user, pass).then(res => {
+      LedgerLive.token = res.token;
+      this._officer = res.officer;
+      this._onAuthenticated();
+      this.toast('ok', 'Signed in as ' + res.officer.displayName);
+    }).catch(e => {
+      err.textContent = e.message || 'Sign-in failed.';
+    }).finally(() => {
+      btn.disabled = false; btn.textContent = 'Sign In';
+    });
+  },
+
+  doLogout() {
+    this._stopIdleWatch();
+    LedgerLive.logout().catch(() => {});
+    LedgerLive.token = null;
+    this._officer = null;
+    this._clearSession();
+    document.getElementById('logoutBtn').style.display = 'none';
+    document.getElementById('fOfficer').value = '';
+    document.getElementById('fOfficerDisplay').textContent = 'Sign in to continue';
+    document.getElementById('topologyPanel').hidden = true;
+    document.getElementById('netMeta').hidden = true;
+    document.getElementById('dashCols').style.gridTemplateColumns = '1fr';
+    document.getElementById('loginOverlay').style.display = 'block';
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginUser').focus();
+    this.toast('ok', 'Signed out');
+  },
+
+  /* ---------- view routing ---------- */
+  go(view) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + view).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(b =>
+      b.classList.toggle('active', b.dataset.view === view));
+    const titles = {
+      dashboard: ['Dashboard', 'Forensic evidence overview and ledger status'],
+      register:  ['Register Evidence', 'Commit a new evidence item to the blockchain'],
+      registry:  ['Evidence Registry', 'Complete on-chain evidence holdings'],
+      cases:     ['Case Register', 'Cases derived from registered evidence, grouped by case ID'],
+      'case-detail': ['Case Detail', 'Evidence items and status within this case'],
+      detail:    ['Evidence Detail', 'Inspect, verify, and trace a single record'],
+      admin:     ['Network & Ledger', 'Connection settings and ledger lifecycle'],
+    };
+    if (titles[view]) {
+      document.getElementById('pageTitle').textContent = titles[view][0];
+      document.getElementById('pageSub').textContent = titles[view][1];
+    }
+    if (view === 'dashboard') this.renderDashboard();
+    if (view === 'registry')  this.renderRegistry();
+    if (view === 'cases')     this.renderCases();
+    window.scrollTo(0, 0);
+  },
+
+  // Case grouping (by caseId, Active-until-all-Sealed) now happens
+  // server-side — see GET /api/cases — since it needs every item in a
+  // case to be correct, which a paginated client-side view can't provide.
+
+  refreshAll() { this.renderDashboard(); },
+
+  _loadingHtml(label) {
+    return `<div class="state-msg"><span class="spin-lg"></span><div>${esc(label || 'Loading…')}</div></div>`;
+  },
+  _errorHtml(title, detail, retryExpr) {
+    return `<div class="state-msg err">
+      <div>${esc(title)}</div>
+      <div style="font-size:11px;margin-top:4px">${esc(detail || '')}</div>
+      <button class="btn btn-ghost btn-sm" onclick="${retryExpr}">Retry</button>
+    </div>`;
+  },
+  // `state` is the _registryState/_casesState object, updated in place
+  // with the page bounds the server just confirmed — registryGoToPage()/
+  // casesGoToPage() clamp against this so an out-of-range page can't be
+  // requested. The Prev/Next buttons' `disabled` attribute stops a real
+  // click, but that's a UI convenience, not a structural guarantee (a
+  // stale render, a race, or any future caller that isn't a button click
+  // could still ask for page 2 of a 1-page result otherwise).
+  _renderPager(prefix, res, state) {
+    const info = document.getElementById(prefix + 'PagerInfo');
+    const prevBtn = document.getElementById(prefix + 'PrevBtn');
+    const nextBtn = document.getElementById(prefix + 'NextBtn');
+    if (!res || res.total === 0) {
+      info.textContent = '';
+      prevBtn.disabled = true; nextBtn.disabled = true;
+      if (state) state.totalPages = 1;
+      return;
+    }
+    if (state) state.totalPages = res.totalPages;
+    const start = (res.page - 1) * res.limit + 1;
+    const end = Math.min(res.page * res.limit, res.total);
+    info.textContent = `${start}–${end} of ${res.total}`;
+    prevBtn.disabled = res.page <= 1;
+    nextBtn.disabled = res.page >= res.totalPages;
+  },
+
+  /* ---------- dashboard ---------- */
+  async renderDashboard() {
+    const rows = document.getElementById('recentRows');
+    const empty = document.getElementById('recentEmpty');
+    try {
+      const s = await LedgerLive.getStats();
+      document.getElementById('stEvidence').textContent = s.totalEvidence;
+      document.getElementById('stCases').textContent = s.activeCases;
+      document.getElementById('stCasesTotal').textContent = s.totalCases;
+      document.getElementById('stVerified').textContent = s.verified;
+      document.getElementById('stVerifiedPct').textContent = s.verifiedPct + '%';
+      // Ledger Transactions stays deliberately un-auto-computed — see
+      // computeTxCount(). Don't clobber an already-computed value on a
+      // routine dashboard refresh.
+      if (!this._txnsComputed) document.getElementById('stTxns').textContent = 'Not computed';
+
+      if (s.recent.length === 0) {
+        rows.innerHTML = '';
+        empty.innerHTML = this._emptyHtml('No evidence registered',
+          'Register the first evidence item to populate the ledger.');
+      } else {
+        empty.innerHTML = '';
+        rows.innerHTML = s.recent.map(raw => { const e = this._normEvidence(raw); return `
+          <tr class="clickable" onclick="App.openDetail('${esc(e.evidenceId)}')">
+            <td><span class="mono">${esc(e.evidenceId)}</span></td>
+            <td><span class="mono-sm">${esc(e.caseId)}</span></td>
+            <td><span class="badge b-type"><span class="bdot"></span>${esc(e.type)}</span></td>
+            <td>${this._statusBadge(e.status)}</td>
+          </tr>`; }).join('');
+      }
+    } catch (e) {
+      rows.innerHTML = '';
+      empty.innerHTML = this._errorHtml('Could not load dashboard data', e.message, 'App.renderDashboard()');
+    }
+  },
+
+  // Explicit, on-demand exact ledger-transaction count — server does the
+  // throttled GetEvidenceHistory sweep (see /api/stats/txcount); the
+  // browser just displays the result.
+  async computeTxCount() {
+    const el = document.getElementById('stTxns');
+    const action = document.getElementById('stTxnsAction');
+    const prevLabel = action.textContent;
+    action.textContent = 'computing…';
+    try {
+      const res = await LedgerLive.getTxCount();
+      el.textContent = res.txns;
+      el.style.color = ''; // was styled as a muted placeholder; restore the real stat look
+      this._txnsComputed = true;
+      action.textContent = 'recompute (as of ' +
+        new Date(res.computedAt).toLocaleTimeString('en-GB',
+          { hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC)';
+    } catch (e) {
+      action.textContent = prevLabel;
+      this.toast('bad', 'Failed to compute transaction count: ' + e.message);
+    }
+  },
+
+  /* ---------- registry ---------- */
+  _registryState: { page: 1, limit: 25, q: '' },
+  registrySearch() {
+    clearTimeout(this._registrySearchTimer);
+    this._registrySearchTimer = setTimeout(() => {
+      this._registryState.q = document.getElementById('searchBox').value || '';
+      this._registryState.page = 1;
+      this.renderRegistry();
+    }, 300);
+  },
+  registryGoToPage(delta) {
+    const s = this._registryState;
+    s.page = Math.min(Math.max(1, s.page + delta), s.totalPages || 1);
+    this.renderRegistry();
+  },
+  async renderRegistry() {
+    const rows = document.getElementById('registryRows');
+    const empty = document.getElementById('registryEmpty');
+    empty.innerHTML = this._loadingHtml('Loading evidence…');
+    rows.innerHTML = '';
+    try {
+      const { page, limit, q } = this._registryState;
+      const res = await LedgerLive.listEvidence({ page, limit, q });
+      const items = res.items.map(r => this._normEvidence(r));
+      if (items.length === 0) {
+        empty.innerHTML = this._emptyHtml(
+          res.total === 0 && !q ? 'Registry is empty' : 'No matching evidence',
+          res.total === 0 && !q ? 'Use Register Evidence to add the first item.'
+                                 : 'Adjust the search to see more records.');
+      } else {
+        empty.innerHTML = '';
+        rows.innerHTML = items.map(e => `
+          <tr class="clickable" onclick="App.openDetail('${esc(e.evidenceId)}')">
+            <td><span class="mono">${esc(e.evidenceId)}</span></td>
+            <td><span class="mono-sm">${esc(e.caseId)}</span></td>
+            <td><span class="badge b-type"><span class="bdot"></span>${esc(e.type)}</span></td>
+            <td>${this._fmtDate(e.timestamp)}</td>
+            <td>${this._statusBadge(e.status)}</td>
+            <td style="text-align:right"><span class="inline-link">Open &rarr;</span></td>
+          </tr>`).join('');
+      }
+      this._renderPager('registry', res, this._registryState);
+    } catch (e) {
+      rows.innerHTML = '';
+      empty.innerHTML = this._errorHtml('Could not load the evidence registry', e.message, 'App.renderRegistry()');
+      this._renderPager('registry', null, this._registryState);
+    }
+  },
+
+  /* ---------- case register ---------- */
+  _casesState: { page: 1, limit: 25, q: '' },
+  casesSearch() {
+    clearTimeout(this._casesSearchTimer);
+    this._casesSearchTimer = setTimeout(() => {
+      this._casesState.q = document.getElementById('caseSearchBox').value || '';
+      this._casesState.page = 1;
+      this.renderCases();
+    }, 300);
+  },
+  casesGoToPage(delta) {
+    const s = this._casesState;
+    s.page = Math.min(Math.max(1, s.page + delta), s.totalPages || 1);
+    this.renderCases();
+  },
+  async renderCases() {
+    const rows = document.getElementById('caseRows');
+    const empty = document.getElementById('caseEmpty');
+    empty.innerHTML = this._loadingHtml('Loading cases…');
+    rows.innerHTML = '';
+    try {
+      const { page, limit, q } = this._casesState;
+      const res = await LedgerLive.listCases({ page, limit, q });
+      if (res.items.length === 0) {
+        empty.innerHTML = this._emptyHtml(
+          res.total === 0 && !q ? 'No cases yet' : 'No matching cases',
+          res.total === 0 && !q ? 'Register the first piece of evidence to open a case.'
+                                 : 'Adjust the search to see more cases.');
+      } else {
+        empty.innerHTML = '';
+        rows.innerHTML = res.items.map(c => `
+          <tr class="clickable" onclick="App.openCase('${esc(c.caseId)}')">
+            <td><span class="mono">${esc(c.caseId)}</span></td>
+            <td>${c.count}</td>
+            <td>${c.active
+                ? '<span class="badge b-type"><span class="bdot"></span>Active</span>'
+                : '<span class="badge b-ok"><span class="bdot"></span>Closed</span>'}</td>
+            <td>${this._fmtDate(c.lastActivity, true)}</td>
+            <td style="text-align:right"><span class="inline-link">Open &rarr;</span></td>
+          </tr>`).join('');
+      }
+      this._renderPager('cases', res, this._casesState);
+    } catch (e) {
+      rows.innerHTML = '';
+      empty.innerHTML = this._errorHtml('Could not load the case register', e.message, 'App.renderCases()');
+      this._renderPager('cases', null);
+    }
+  },
+
+  async openCase(caseId) {
+    this.currentCaseId = caseId;
+    this.go('case-detail');
+    await this.ensureOfficerMap();
+    document.getElementById('cTitle').textContent = caseId;
+    document.getElementById('cSub').innerHTML = this._loadingHtml('Loading case…');
+    document.getElementById('caseDetailRows').innerHTML = '';
+    try {
+      // A case's true item count/status needs every one of its items, not
+      // a page of them — 200 is the backend's per-request cap, comfortably
+      // above what a single investigation accumulates.
+      const res = await LedgerLive.listEvidence({ caseId, limit: 200 });
+      const items = res.items.map(r => this._normEvidence(r));
+      if (items.length === 0) {
+        this.toast('bad', 'Case not found: ' + caseId);
+        this.go('cases');
+        return;
+      }
+      const sealedCount = items.filter(e => e.status === 'Sealed').length;
+      const active = sealedCount < items.length;
+      document.getElementById('cSub').innerHTML = active
+        ? `<span class="badge b-type"><span class="bdot"></span>Active</span>&nbsp; `
+          + `${sealedCount}/${items.length} item(s) sealed — a case stays Active until every item within it has been sealed.`
+        : `<span class="badge b-ok"><span class="bdot"></span>Closed</span>&nbsp; `
+          + `all ${items.length} item(s) sealed.`;
+      document.getElementById('caseDetailRows').innerHTML = items.map(e => `
+        <tr class="clickable" onclick="App.openDetail('${esc(e.evidenceId)}')">
+          <td><span class="mono">${esc(e.evidenceId)}</span></td>
+          <td><span class="badge b-type"><span class="bdot"></span>${esc(e.type)}</span></td>
+          <td>${esc(this._officerLabel(e.custodian))}</td>
+          <td>${this._fmtDate(e.timestamp)}</td>
+          <td>${this._statusBadge(e.status)}</td>
+          <td style="text-align:right"><span class="inline-link">Open &rarr;</span></td>
+        </tr>`).join('');
+    } catch (e) {
+      document.getElementById('cSub').innerHTML = '';
+      document.getElementById('caseDetailRows').innerHTML =
+        `<tr><td colspan="6">${this._errorHtml('Could not load this case', e.message, `App.openCase('${esc(caseId)}')`)}</td></tr>`;
+    }
+  },
+
+  /* ---------- detail ---------- */
+  async openDetail(id) {
+    this.currentId = id;
+    this.go('detail');
+    document.getElementById('verifyResult').innerHTML = '';
+    let rec;
+    try { rec = this._normEvidence(await LedgerLive.getEvidence(id)); }
+    catch (e) { this.toast('bad', e.message); return; }
+    await this.ensureOfficerMap();
+
+    document.getElementById('dTitle').textContent = rec.evidenceId;
+    document.getElementById('dStatus').innerHTML = this._statusBadge(rec.status);
+
+    document.getElementById('detailGrid').innerHTML = `
+      <div class="detail-cell"><div class="detail-k">Evidence ID</div>
+        <div class="detail-v mono">${esc(rec.evidenceId)}</div></div>
+      <div class="detail-cell"><div class="detail-k">Case ID</div>
+        <div class="detail-v mono">${esc(rec.caseId)}</div></div>
+      <div class="detail-cell"><div class="detail-k">Evidence Type</div>
+        <div class="detail-v">${esc(rec.type)}</div></div>
+      <div class="detail-cell"><div class="detail-k">Collecting Officer</div>
+        <div class="detail-v">${esc(this._officerLabel(rec.officer))}</div></div>
+      <div class="detail-cell"><div class="detail-k">Current Custodian</div>
+        <div class="detail-v" id="dCustodian">${esc(this._officerLabel(rec.custodian))}</div></div>
+      <div class="detail-cell full"><div class="detail-k">Description</div>
+        <div class="detail-v">${rec.description ? esc(rec.description) : '—'}</div></div>
+      <div class="detail-cell full"><div class="detail-k">SHA-256 Metadata Hash</div>
+        <div class="detail-v">${this._hashChip(rec.hash)}</div></div>
+      <div class="detail-cell full"><div class="detail-k">SHA-256 Content Hash (artefact)</div>
+        <div class="detail-v">${rec.contentHash
+            ? this._hashChip(rec.contentHash) : '<span style="color:var(--muted)">no artefact linked</span>'}</div></div>
+      <div class="detail-cell"><div class="detail-k">Registered</div>
+        <div class="detail-v">${this._fmtDate(rec.timestamp, true)}</div></div>
+      <div class="detail-cell"><div class="detail-k">IPFS CID</div>
+        <div class="detail-v">${rec.ipfsCid ? this._hashChip(rec.ipfsCid)
+            : '<span style="color:var(--muted)">not linked</span>'}</div></div>`;
+
+    // chain of custody
+    try {
+      const hist = await LedgerLive.getEvidenceHistory(id);
+      this._renderCustodyTimeline(hist);
+    } catch (e) {
+      document.getElementById('custodyTimeline').innerHTML =
+        '<p style="font-size:12px;color:var(--muted)">No custody history available.</p>';
+    }
+
+    // chain-of-custody transfer panel — the chaincode further requires the
+    // CALLER to be the current custodian, enforced server-side, not just here
+    const transferBtn  = document.getElementById('btnTransfer');
+    const transferNote = document.getElementById('transferResult');
+    document.getElementById('fTransferStatus').value = '';
+    document.getElementById('fTransferReason').value = '';
+    if (LedgerLive.token) {
+      transferBtn.disabled = false;
+      transferNote.innerHTML = '';
+      this.loadOfficers('fTransferTo');
+    } else {
+      transferBtn.disabled = true;
+      document.getElementById('fTransferTo').innerHTML = '<option value="">Sign in to select an officer…</option>';
+      transferNote.innerHTML =
+        '<p style="font-size:12px;color:var(--muted)">Sign in to transfer custody.</p>';
+    }
+  },
+
+  /* ---------- verify integrity ---------- */
+  async verify() {
+    if (!this.currentId) return;
+    const btn = document.getElementById('btnVerify');
+    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Verifying…';
+    try {
+      const raw = await LedgerLive.verifyIntegrity(this.currentId);
+      const metaIntact     = raw.metadata.intact;
+      const storedHash     = raw.metadata.storedHash;
+      const recomputedHash = raw.metadata.recomputedHash;
+      const offChain       = raw.offChain || { checked: false };
+      const pass           = raw.fullyVerified;
+      // Cached for the print/export report — "the result of the latest
+      // integrity check if one was run" only means something if it's
+      // scoped to THIS record; openDetail() on a different item must not
+      // carry a stale result forward as if it were current.
+      this._lastVerify = {
+        evidenceId: this.currentId, pass, metaIntact, storedHash, recomputedHash,
+        offChain, timestamp: new Date().toISOString(),
+      };
+      const box = document.getElementById('verifyResult');
+
+      // Off-chain (IPFS) section — only shown when an artefact was checked
+      let offHtml = '';
+      if (offChain.checked && !offChain.error) {
+        offHtml = `
+          <div class="verify-row" style="margin-top:8px"><span class="vk">IPFS artefact</span>
+            ${offChain.artefactIntact
+              ? 'Re-fetched from IPFS — content hash matches.'
+              : 'Re-fetched from IPFS — <b>content hash MISMATCH</b>.'}</div>
+          <div class="verify-row"><span class="vk">IPFS CID</span>
+            ${this._hashChip(offChain.ipfsCid)}</div>
+          <div class="verify-row"><span class="vk">Stored content hash</span>
+            ${this._hashChip(offChain.storedContentHash)}</div>
+          <div class="verify-row"><span class="vk">Recomputed</span>
+            ${this._hashChip(offChain.recomputedContentHash)}</div>`;
+      } else if (offChain.checked && offChain.error) {
+        offHtml = `<div class="verify-row" style="margin-top:8px"><span class="vk">IPFS artefact</span>
+            ${esc(offChain.error)}</div>`;
+      } else {
+        offHtml = `<div class="verify-row" style="margin-top:8px"><span class="vk">IPFS artefact</span>
+            No off-chain artefact linked to this record.</div>`;
+      }
+
+      box.innerHTML = `
+        <div class="verify-box ${pass ? 'pass' : 'fail'}">
+          <div class="verify-head">
+            ${pass
+              ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.5"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>'
+              : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2.5"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg>'}
+            <span class="vt">${pass ? 'Integrity Confirmed' : 'Integrity Compromised'}</span>
+          </div>
+          <div class="verify-row"><span class="vk">Metadata hash</span>
+            ${metaIntact ? 'On-chain record intact.' : 'On-chain record altered.'}</div>
+          <div class="verify-row"><span class="vk">Stored hash</span>
+            ${this._hashChip(storedHash)}</div>
+          <div class="verify-row"><span class="vk">Recomputed hash</span>
+            ${this._hashChip(recomputedHash)}</div>
+          ${offHtml}
+        </div>`;
+      this.toast(pass ? 'ok' : 'bad',
+        pass ? 'Integrity verified for ' + this.currentId
+             : 'Integrity check FAILED for ' + this.currentId);
+      this.renderDashboard();
+      this.openDetailRefreshTimeline();
+    } catch (e) {
+      this.toast('bad', e.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg> Run Integrity Check';
+    }
+  },
+
+  async openDetailRefreshTimeline() {
+    try {
+      await this.ensureOfficerMap();
+      const hist = await LedgerLive.getEvidenceHistory(this.currentId);
+      this._renderCustodyTimeline(hist);
+    } catch (_) {}
+  },
+
+  // Court-ready export: full evidence record (both hashes and the CID in
+  // full, not truncated), the complete chain of custody with every
+  // transaction ID and UTC timestamp, the latest integrity check result
+  // IF one was run this session (honestly says so if not, rather than
+  // pretending), and a generated-on stamp with the exporting officer's
+  // identity. Renders into #printReport and hands off to the browser's
+  // own print engine — see the @media print rules for why that's the
+  // right call for something meant to be admissible, not a bundled PDF
+  // library.
+  async printReport() {
+    if (!this.currentId) return;
+    try {
+      await this.ensureOfficerMap();
+      const rec = this._normEvidence(await LedgerLive.getEvidence(this.currentId));
+      const hist = await LedgerLive.getEvidenceHistory(this.currentId);
+      const v = (this._lastVerify && this._lastVerify.evidenceId === this.currentId) ? this._lastVerify : null;
+      const generatedAt = this._fmtDate(new Date().toISOString(), true);
+      const officer = this._officer
+        ? `${this._officer.displayName} (${this._officer.username} — ${this._officer.orgLabel || ''})`
+        : 'Unknown';
+
+      const verifyHtml = v ? `
+        <table class="pr-table">
+          <tr><th>Result</th><td>${v.pass ? 'PASS — integrity confirmed' : 'FAIL — integrity compromised'}</td></tr>
+          <tr><th>Checked at</th><td>${this._fmtDate(v.timestamp, true)}</td></tr>
+          <tr><th>Metadata hash</th><td>${v.metaIntact ? 'Intact — matches on-chain record.' : 'ALTERED — does not match on-chain record.'}</td></tr>
+          <tr><th>Off-chain artefact</th><td>${
+            v.offChain && v.offChain.checked
+              ? (v.offChain.artefactIntact ? 'Re-fetched from IPFS — content hash matches.' : 'MISMATCH — re-fetched content hash does not match.')
+              : 'Not checked (no artefact linked, or check failed).'
+          }</td></tr>
+        </table>`
+        : `<p>Not run this session for this record. Run "Run Integrity Check" on the Evidence Detail page immediately before exporting for the most current result.</p>`;
+
+      document.getElementById('printReport').innerHTML = `
+        <h1>DEMS Evidence Report</h1>
+        <div class="pr-meta">Generated ${esc(generatedAt)} by ${esc(officer)}</div>
+        <div class="pr-meta">Channel: evidence &middot; Chaincode: EvidenceContract (Go)</div>
+
+        <h2>Evidence Record</h2>
+        <table class="pr-table">
+          <tr><th>Evidence ID</th><td>${esc(rec.evidenceId)}</td></tr>
+          <tr><th>Case ID</th><td>${esc(rec.caseId)}</td></tr>
+          <tr><th>Type</th><td>${esc(rec.type)}</td></tr>
+          <tr><th>Status</th><td>${esc((STATUS_META[rec.status] && STATUS_META[rec.status].label) || rec.status)}</td></tr>
+          <tr><th>Collecting Officer</th><td>${esc(this._officerLabel(rec.officer))}</td></tr>
+          <tr><th>Current Custodian</th><td>${esc(this._officerLabel(rec.custodian))}</td></tr>
+          <tr><th>Registered</th><td>${this._fmtDate(rec.timestamp, true)}</td></tr>
+          <tr><th>Description</th><td>${rec.description ? esc(rec.description) : '—'}</td></tr>
+          <tr><th>SHA-256 Metadata Hash</th><td class="pr-mono">${esc(rec.hash)}</td></tr>
+          <tr><th>SHA-256 Content Hash</th><td class="pr-mono">${rec.contentHash ? esc(rec.contentHash) : 'no artefact linked'}</td></tr>
+          <tr><th>IPFS CID</th><td class="pr-mono">${rec.ipfsCid ? esc(rec.ipfsCid) : 'not linked'}</td></tr>
+        </table>
+
+        <h2>Latest Integrity Check</h2>
+        ${verifyHtml}
+
+        <h2>Chain of Custody (${hist.length} transaction${hist.length === 1 ? '' : 's'})</h2>
+        <table class="pr-table">
+          <thead><tr><th style="width:auto">#</th><th style="width:auto">Timestamp</th><th style="width:auto">Event</th><th style="width:auto">Custodian</th><th style="width:auto">Reason</th><th style="width:auto">Transaction ID</th></tr></thead>
+          <tbody>
+            ${hist.map((h, i) => {
+              const n = this._normHistory(h, i, hist.length);
+              const who = h.evidence ? this._officerLabel(h.evidence.currentCustodian) : '';
+              const reason = h.evidence && h.evidence.transferReason;
+              return `<tr>
+                <td>${hist.length - i}</td>
+                <td>${this._fmtDate(h.timestamp, true)}</td>
+                <td>${esc(n.action)}</td>
+                <td>${esc(who)}</td>
+                <td>${reason ? esc(reason) : '—'}</td>
+                <td class="pr-mono">${esc(h.txId)}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+
+        <div class="pr-footer">DEMS — Digital Evidence Management System. This report reflects
+          the ledger state at the time of generation above and is a rendering for reference —
+          it is not itself an on-chain record. Verify against the live ledger for current status.</div>`;
+      window.print();
+    } catch (e) {
+      this.toast('bad', 'Could not generate report: ' + e.message);
+    }
+  },
+
+  /* ---------- register ---------- */
+  // The artefact is uploaded to IPFS via the backend, which returns the
+  // CID and the SHA-256 content hash — only those go on-chain, never the
+  // raw file.
+  _ipfs: { cid: '', contentHash: '' },
+  async hashFile() {
+    const f = document.getElementById('fFile').files[0];
+    if (!f) return;
+    const note = document.getElementById('hashNote');
+    this._ipfs = { cid: '', contentHash: '' };
+
+    note.className = 'field-note';
+    note.textContent = 'Uploading artefact to IPFS…';
+    try {
+      const r = await LedgerLive.ipfsUpload(f);
+      this._ipfs = { cid: r.cid, contentHash: r.contentHash };
+      document.getElementById('fHash').value = r.contentHash;
+      const cidField = document.getElementById('fCid');
+      if (cidField) cidField.value = r.cid;
+      note.className = 'field-note ok';
+      note.textContent = '✓ Stored on IPFS — CID ' + r.cid.slice(0, 18) +
+        '… (' + (r.size/1024).toFixed(1) + ' KB)';
+    } catch (e) {
+      note.className = 'field-note';
+      note.textContent = '✗ IPFS upload failed: ' + e.message;
+      this.toast('bad', 'IPFS upload failed: ' + e.message);
+    }
+  },
+
+  async register() {
+    // Location/Condition are structured inputs for readability, but the
+    // chaincode's RegisterEvidence signature is untouched (ground rule:
+    // no changes to existing benchmarked functions) — they're merged into
+    // the same description field it already accepts, clearly labelled, so
+    // they're still part of the permanent immutable record without a
+    // chaincode change. NIST SP 800-86 / ISO 27037 require capturing
+    // where/how an item was found at collection time.
+    const location = document.getElementById('fLocation').value.trim();
+    const condition = document.getElementById('fCondition').value.trim();
+    const descRaw = document.getElementById('fDesc').value.trim();
+    const collectionNotes = [
+      location  ? `Location/Source Found: ${location}` : '',
+      condition ? `Condition at Collection: ${condition}` : '',
+    ].filter(Boolean).join('\n');
+    const description = collectionNotes ? `${collectionNotes}\n\n${descRaw}` : descRaw;
+
+    const rec = {
+      evidenceId: document.getElementById('fEvId').value.trim(),
+      caseId:     document.getElementById('fCaseId').value.trim(),
+      type:       document.getElementById('fType').value,
+      officer:    document.getElementById('fOfficer').value.trim(),
+      officerId:  document.getElementById('fOfficer').value.trim(),
+      description,
+      hash:       document.getElementById('fHash').value.trim(),
+      ipfsCid:    document.getElementById('fCid').value.trim(),
+      // v2: SHA-256 of the artefact bytes — set by hashFile() after IPFS upload
+      contentHash: this._ipfs.contentHash || document.getElementById('fHash').value.trim(),
+    };
+    if (!rec.evidenceId || !rec.caseId || !rec.type || !descRaw || !rec.hash) {
+      this.toast('bad', 'Complete all required fields before committing');
+      return;
+    }
+    const btn = document.getElementById('btnRegister');
+    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Committing…';
+    try {
+      await LedgerLive.registerEvidence(rec);
+      this.toast('ok', rec.evidenceId + ' committed to the ledger');
+      this._ipfs = { cid: '', contentHash: '' };
+      ['fEvId','fCaseId','fDesc','fHash','fCid','fLocation','fCondition'].forEach(id =>
+        document.getElementById(id).value = '');
+      document.getElementById('fType').value = '';
+      document.getElementById('hashNote').className = 'field-note';
+      document.getElementById('hashNote').textContent = 'Upload a file, or paste a known hash.';
+      this.refreshAll();
+      this.openDetail(rec.evidenceId);
+    } catch (e) {
+      this.toast('bad', e.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg> Commit to Ledger';
+    }
+  },
+
+  /* ---------- admin ---------- */
+  async initLedger() {
+    try {
+      await LedgerLive.initLedger();
+      this.refreshAll();
+      this.toast('ok', 'InitLedger committed — ledger seeded');
+      this.go('dashboard');
+    } catch (e) { this.toast('bad', e.message); }
+  },
+
+  // v3: populate an officer dropdown from the live backend.
+  // v5: generalised to target any <select> (used for both the Register
+  // form's locked officer field and the Transfer Custody target picker).
+  async loadOfficers(targetId) {
+    const sel = document.getElementById(targetId || 'fOfficer');
+    if (!sel) return;
+    try {
+      const officers = await LedgerLive.listOfficers();
+      if (!officers.length) {
+        sel.innerHTML = '<option value="">(no officers enrolled)</option>';
+        return;
+      }
+      sel.innerHTML = '<option value="">Select officer…</option>' + officers.map(o =>
+        `<option value="${esc(o.id)}">${esc(o.displayName)} — ${esc(o.orgLabel)}</option>`).join('');
+    } catch (e) {
+      sel.innerHTML = '<option value="">(officer list unavailable)</option>';
+    }
+  },
+
+  // v5: build/refresh the identityId -> officer lookup used to turn raw
+  // MSP identities (e.g. "Org1MSP::juma.ismail") into readable names
+  // ("Juma Ismail — Org1") wherever custody/authorship is shown.
+  async ensureOfficerMap() {
+    try {
+      const officers = await LedgerLive.listOfficers();
+      const map = {};
+      officers.forEach(o => { map[o.id] = o; });
+      this.officerMap = map;
+    } catch (e) { this.officerMap = {}; }
+  },
+  // Resolves a raw identity string (e.g. "Org1MSP::juma.ismail") to a
+  // readable label. Falls back to the raw value unchanged if the officer
+  // map hasn't loaded yet or the identity isn't in it.
+  _officerLabel(raw) {
+    if (!raw) return '—';
+    const o = this.officerMap[raw];
+    return o ? `${o.displayName} (${o.orgLabel})` : raw;
+  },
+  // Shared renderer for the "Chain of Custody" timeline — used both when
+  // opening the Detail page and when refreshing it after a Verify/Transfer,
+  // so the officer name shown here can never drift out of sync between them.
+  _renderCustodyTimeline(hist) {
+    document.getElementById('custodyTimeline').innerHTML = hist.map((h, i) => {
+      const n = this._normHistory(h, i, hist.length);
+      const who = h.evidence ? this._officerLabel(h.evidence.currentCustodian) : '';
+      const reason = h.evidence && h.evidence.transferReason;
+      return `
+      <div class="tl-item ${n.isGenesis ? 'genesis' : ''}">
+        <div class="tl-head">
+          <span class="tl-action">${esc(n.action)}</span>
+          <span class="tl-time">${this._fmtDate(n.timestamp, true)}</span>
+        </div>
+        <div class="tl-detail">${who ? `Custodian: <b>${esc(who)}</b> &middot; ` : ''}Transaction <span class="tl-tx">${esc((n.txId||'').slice(0, 24))}…</span></div>
+        ${reason ? `<div class="tl-reason">Reason: ${esc(reason)}</div>` : ''}
+      </div>`; }).join('');
+  },
+
+  /* ---------- chain-of-custody transfer ---------- */
+  // Shows a confirmation dialog before ANY custody transfer — this writes
+  // a permanent, unremovable transaction to the ledger, so the previous
+  // one-click submit was one accidental click away from a real
+  // chain-of-custody event. _doTransferCustody() does the actual submit,
+  // only ever called from the dialog's Confirm button.
+  transferCustody() {
+    if (!this.currentId) return;
+    if (!LedgerLive.token) {
+      this.toast('bad', 'Sign in to transfer custody on-chain.');
+      return;
+    }
+    const sel = document.getElementById('fTransferTo');
+    const newCustodianId = sel.value;
+    const newStatus = document.getElementById('fTransferStatus').value;
+    const reason = document.getElementById('fTransferReason').value.trim();
+    if (!newCustodianId) { this.toast('bad', 'Select an officer to transfer to.'); return; }
+    if (!reason) { this.toast('bad', 'Enter a reason for the transfer.'); return; }
+
+    const fromLabel = document.getElementById('dCustodian').textContent;
+    const toLabel = sel.options[sel.selectedIndex].textContent;
+    const statusLabel = newStatus ? (STATUS_META[newStatus] ? STATUS_META[newStatus].label : newStatus) : '(unchanged)';
+
+    this._openModal({
+      title: 'Confirm Custody Transfer',
+      sub: this.currentId,
+      bodyHtml: `
+        <div class="verify-row"><span class="vk">Evidence</span><span class="mono">${esc(this.currentId)}</span></div>
+        <div class="verify-row"><span class="vk">From</span>${esc(fromLabel)}</div>
+        <div class="verify-row"><span class="vk">To</span><b>${esc(toLabel)}</b></div>
+        <div class="verify-row"><span class="vk">New status</span>${esc(statusLabel)}</div>
+        <div class="verify-row"><span class="vk">Reason</span>${esc(reason)}</div>
+        <p style="font-size:12px;color:var(--bad);margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
+          This is recorded permanently on the blockchain ledger and cannot be undone or edited.
+        </p>`,
+      buttons: [
+        { label: 'Cancel', cls: 'btn-ghost' },
+        { label: 'Confirm Transfer', cls: 'btn-navy',
+          onClick: () => this._doTransferCustody(newCustodianId, newStatus, reason) },
+      ],
+    });
+  },
+
+  async _doTransferCustody(newCustodianId, newStatus, reason) {
+    const btn = document.getElementById('btnTransfer');
+    const restoreHtml = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Transferring…';
+    try {
+      await LedgerLive.transferCustody(this.currentId, newCustodianId, newStatus, reason);
+      this.toast('ok', 'Custody transferred — new transaction committed on-chain');
+      await this.openDetail(this.currentId); // reloads record + custody timeline
+      this.renderRegistry();
+    } catch (e) {
+      // e.g. chaincode rejecting a non-custodian caller — surface it as-is,
+      // it's a genuine on-chain authorisation error worth showing verbatim
+      this.toast('bad', e.message);
+    } finally {
+      btn.disabled = false; btn.innerHTML = restoreHtml;
+    }
+  },
+
+  /* ---------- helpers ---------- */
+  // Normalises a chaincode evidence record (evidenceType/currentCustodian/
+  // submittedAt/submittedBy) into the flatter shape the UI renders.
+  _normEvidence(r) {
+    if (!r) return r;
+    return {
+      evidenceId:  r.evidenceId,
+      caseId:      r.caseId,
+      type:        r.evidenceType || '—',
+      // 'officer' = who ORIGINALLY collected/submitted the item (fixed);
+      // 'custodian' = who currently HOLDS it (changes with each transfer).
+      // These used to be collapsed into one field, so after a custody
+      // transfer the UI would silently relabel the original collecting
+      // officer as whoever the item had just been handed to.
+      officer:     r.submittedBy || r.currentCustodian || '—',
+      custodian:   r.currentCustodian || r.submittedBy || '—',
+      description: r.description,
+      hash:        r.hash,
+      contentHash: r.contentHash || '',
+      ipfsCid:     r.ipfsCid     || '',
+      status:      r.status,
+      timestamp:   r.submittedAt || r.lastModified,
+    };
+  },
+  // Normalises a GetEvidenceHistory entry ({txId, timestamp, isDelete,
+  // evidence}) into a readable action label for the custody timeline.
+  _normHistory(h, index, total) {
+    const isGenesis = index === total - 1;
+    let action = isGenesis ? 'Genesis · RegisterEvidence' : 'Ledger update';
+    if (h.evidence && h.evidence.status)
+      action = isGenesis ? 'RegisterEvidence' : 'Update · ' + h.evidence.status;
+    return { txId: h.txId, timestamp: h.timestamp, action, isGenesis };
+  },
+  // Chain-of-custody admissibility requirement: every rendered timestamp
+  // must be unambiguous. This used to render in whatever timezone the
+  // VIEWER'S BROWSER happened to be set to, with no label at all — two
+  // officers in different timezones looking at the same record saw
+  // different, unmarked clock times with no way to know they weren't
+  // looking at the same instant. Always UTC, always labelled, no
+  // exceptions. The underlying values are already proper ISO 8601 from
+  // the chaincode (RFC3339, Z-suffixed) — this is a display-only fix.
+  _fmtDate(iso, withTime) {
+    const d = new Date(iso);
+    const date = d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric', timeZone: 'UTC' });
+    if (!withTime) return date;
+    const time = d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', timeZone: 'UTC', hour12: false });
+    return `${date} · ${time} UTC`;
+  },
+  // One consistent color per status, everywhere a status renders — see
+  // STATUS_META. `title` gives a hover tooltip; the Registry/Case Register
+  // pages also show a static legend for at-a-glance reference.
+  _statusBadge(status) {
+    const meta = STATUS_META[status] || { cls: 'b-type', label: status || '—', desc: '' };
+    return `<span class="badge ${meta.cls}" title="${esc(meta.desc)}"><span class="bdot"></span>${esc(meta.label)}</span>`;
+  },
+
+  // Every hash/CID in the app used to be truncated by hand with a
+  // different length each time (18/24/28/32 chars) and none of them were
+  // copyable — the full value only ever existed by reading it out of the
+  // page source. One consistent head…tail chip, full value on hover via
+  // `title`, and an actual copy button.
+  _hashChip(value, head = 10, tail = 6) {
+    if (!value) return '<span style="color:var(--muted)">—</span>';
+    const v = String(value);
+    const short = v.length > head + tail + 1 ? `${v.slice(0, head)}…${v.slice(-tail)}` : v;
+    return `<span class="hash-chip" title="${esc(v)}">
+      <span class="hc-val">${esc(short)}</span>
+      <button type="button" class="hc-copy" aria-label="Copy full value" onclick="App.copyHash('${esc(v)}', this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </button>
+    </span>`;
+  },
+  async copyHash(value, btn) {
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch (_) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = value; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      } catch (_) { this.toast('bad', 'Copy failed — select and copy manually.'); return; }
+    }
+    btn.classList.add('copied');
+    const original = btn.innerHTML;
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>';
+    setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = original; }, 1200);
+  },
+  _emptyHtml(title, sub) {
+    return `<div class="empty">
+      <div class="empty-glyph">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9EB3C2" stroke-width="2">
+          <rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>
+      </div>
+      <h4>${title}</h4><p>${sub}</p></div>`;
+  },
+  toast(kind, msg) {
+    const t = document.createElement('div');
+    t.className = 'toast ' + kind;
+    t.innerHTML = (kind === 'ok'
+      ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>'
+      : kind === 'bad'
+      ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>'
+      : '') + '<span>' + esc(msg) + '</span>';
+    document.getElementById('toastWrap').appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(20px)';
+      setTimeout(() => t.remove(), 300); }, 3400);
+  },
+  // Generic confirm/warning dialog. `buttons` is an array of
+  // {label, cls, onClick} — each click closes the modal, THEN runs
+  // onClick, so a confirm handler never fires while the dialog is still
+  // technically open. Focus moves to the first button on open and back to
+  // whatever triggered the dialog on close; Tab/Shift+Tab wrap within the
+  // dialog's buttons rather than escaping to the page behind it.
+  _openModal({ title, sub, bodyHtml, buttons }) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalSub').textContent = sub || '';
+    document.getElementById('modalBody').innerHTML = bodyHtml || '';
+    const foot = document.getElementById('modalFoot');
+    foot.innerHTML = '';
+    (buttons || []).forEach(b => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn ' + (b.cls || 'btn-ghost');
+      btn.textContent = b.label;
+      btn.onclick = () => { this.closeModal(); if (b.onClick) b.onClick(); };
+      foot.appendChild(btn);
+    });
+    this._modalReturnFocus = document.activeElement;
+    document.getElementById('modalBg').classList.add('show');
+    setTimeout(() => { const first = foot.querySelector('button'); if (first) first.focus(); }, 0);
+  },
+  closeModal() {
+    document.getElementById('modalBg').classList.remove('show');
+    if (this._modalReturnFocus && this._modalReturnFocus.focus) this._modalReturnFocus.focus();
+    this._modalReturnFocus = null;
+    // Any close path (Escape, Cancel, a button click) must stop the idle
+    // countdown — otherwise dismissing the warning any way other than its
+    // own buttons leaves a silent background timer that logs the officer
+    // out anyway a few seconds later, despite them believing they'd
+    // cancelled it.
+    clearInterval(this._idleWarnInterval);
+  },
+  // Escape closes; Tab/Shift+Tab wrap within the dialog's buttons instead
+  // of leaving it. Registered once in boot().
+  _modalKeydown(e) {
+    const bg = document.getElementById('modalBg');
+    if (!bg.classList.contains('show')) return;
+    if (e.key === 'Escape') { e.preventDefault(); App.closeModal(); return; }
+    if (e.key !== 'Tab') return;
+    const focusable = Array.from(document.getElementById('modalFoot').querySelectorAll('button'));
+    if (!focusable.length) return;
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  },
+};
+
+window.addEventListener('DOMContentLoaded', () => App.boot());
+</script>
+</body>
+</html>
