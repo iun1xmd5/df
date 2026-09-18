@@ -1,0 +1,7 @@
+
+# --- dems-application/ additions ---
+node_modules/
+dems-application/evidence-chaincode/vendor/
+dems-application/evidence-chaincode/evidence-chaincode
+dems-application/DEMS_Application_Layer/backend/officers.auth.json
+*.log

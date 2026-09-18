@@ -1,0 +1,15 @@
+[Unit]
+Description=DEMS: start Hyperledger Fabric test-network containers
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/docker start \
+  ca_orderer ca_org1 ca_org2 \
+  orderer.example.com peer0.org1.example.com peer0.org2.example.com \
+  dev-peer0.org1.example.com-evidence_1.0-22b16765484b0d199aeab07a670b98bf5a6a013b381793f783e888bb0b7dcd06 \
+  dev-peer0.org2.example.com-evidence_1.0-22b16765484b0d199aeab07a670b98bf5a6a013b381793f783e888bb0b7dcd06
+ExecStop=/bin/true
+
+[Install]
+WantedBy=default.target
