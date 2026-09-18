@@ -1,0 +1,22 @@
+{
+  "name": "dems-fabric-backend",
+  "version": "1.0.0",
+  "description": "Fabric Gateway REST backend for the DEMS digital evidence management application layer",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Juma Ismail",
+  "license": "MIT",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.10.6",
+    "@hyperledger/fabric-gateway": "^1.5.1",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

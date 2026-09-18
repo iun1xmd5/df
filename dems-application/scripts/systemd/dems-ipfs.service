@@ -1,0 +1,12 @@
+[Unit]
+Description=DEMS: IPFS (Kubo) daemon
+After=dems-fabric.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/ipfs daemon
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

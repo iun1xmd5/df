@@ -1,0 +1,15 @@
+[Unit]
+Description=DEMS: Node.js application backend (Fabric Gateway + IPFS + REST API)
+After=dems-fabric.service dems-ipfs.service
+Wants=dems-fabric.service dems-ipfs.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/el-sela/dissertation/DEMS_Application_Layer/backend
+ExecStartPre=/home/el-sela/dissertation/scripts/wait-for-fabric.sh
+ExecStart=/home/el-sela/.nvm/versions/node/v18.20.8/bin/node server.js
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
